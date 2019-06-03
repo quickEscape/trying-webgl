@@ -22,9 +22,9 @@ const autoprefixer = require("autoprefixer"),
 
 const config = {
   pug: true,
-  sprites: true,
-  spritesSVG: true,
-  fico: true,
+  sprites: false,
+  spritesSVG: false,
+  fico: false,
   webpackJS: true,
   reload: true
 };
