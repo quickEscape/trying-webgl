@@ -1,5 +1,7 @@
-// XYZ(imgUrl : String, imgWidth : Integer, imgHeight : Integer)
-export default function XYZ(imgUrl, imgWidth, imgHeight) {
+import ColorGUIHelper from "./ColorGUIHelper";
+
+// XYZ(imgUrl : String, imgWidth : Integer, imgHeight : Integer, fullscreen : Boolean)
+export default function XYZ(imgUrl, imgWidth, imgHeight, fullscreen) {
 	this._options = {
 		canvas: {
 			width: 800,
@@ -19,7 +21,7 @@ export default function XYZ(imgUrl, imgWidth, imgHeight) {
 			height: 800,
 			wSegments: 1,
 			hSegments: 1,
-			color: 0xff00ff, //string or hex
+			color: 0x000000, //string or hex
 			geometry: null,
 			material: null,
 			elem: null
@@ -28,7 +30,7 @@ export default function XYZ(imgUrl, imgWidth, imgHeight) {
 			width: imgWidth * 10 || 400,
 			height: imgHeight * 10 || 400,
 			blockSize: 10,
-			blockSpacing: 1
+			blockSpacing: 0
 		},
 		stepsToDone: 125,
 		imgUrl: imgUrl || '../img/Untitled-1.png'
@@ -91,7 +93,7 @@ XYZ.prototype._setupFigure = function (color) {
 	}
 };
 
-// improve this func
+// important to improve this func
 // _setupLights(color: string or hex, posY: position y)
 XYZ.prototype._setupLights = function (color, posY) {
 	/* we need to add a light so we can see our cube - its almost
@@ -104,6 +106,47 @@ XYZ.prototype._setupLights = function (color, posY) {
 			this._scene.add(this.lights[this.lights.length - 1]);
 		}
 	}
+};
+
+// testLight(lightType : String)
+// ambient | hemisphere | directional
+XYZ.prototype.testLight = function (lightType) {
+	const gui = new dat.GUI();
+	const intensity = 1;
+	let light, color;
+	switch (lightType) {
+		case 'ambient':
+			color = 0xFFFFFF;
+			light = new THREE.AmbientLight(color, intensity);
+			gui.addColor(new ColorGUIHelper(light, 'color'), 'value').name('color');
+			gui.add(light, 'intensity', 0, 2, 0.01);
+			break;
+		case 'hemisphere':
+			const skyColor = 0xB1E1FF; // light blue
+			const groundColor = 0xB97A20; // brownish orange
+			light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
+			gui.addColor(new ColorGUIHelper(light, 'color'), 'value').name('skyColor');
+			gui.addColor(new ColorGUIHelper(light, 'groundColor'), 'value').name('groundColor');
+			gui.add(light, 'intensity', 0, 2, 0.01);
+			break;
+		case 'directional':
+			color = 0xFFFFFF;
+			light = new THREE.DirectionalLight(color, intensity);
+			light.position.set(0, 10, 0);
+			light.target.position.set(-5, 0, 0);
+			gui.addColor(new ColorGUIHelper(light, 'color'), 'value').name('color');
+			gui.add(light, 'intensity', 0, 2, 0.01);
+			gui.add(light.target.position, 'x', -10, 10);
+			gui.add(light.target.position, 'z', -10, 10);
+			gui.add(light.target.position, 'y', 0, 10);
+			const helper = new THREE.DirectionalLightHelper(light);
+			this._scene.add(helper);
+			break;
+	}
+
+	if (!light) return;
+	this._scene.add(light);
+	if (light.target) this._scene.add(light.target);
 };
 
 XYZ.prototype._setupControls = function () {
@@ -196,8 +239,8 @@ XYZ.prototype._init = function () {
 	document.body.appendChild(this._renderer.domElement);
 	this._setupPlane();
 	this._setupControls();
-	this._setupFigure(0x0000ff);
-	this._setupLights(0xffffff, 1000);
+	this._setupFigure(0xffffff);
+	// this._setupLights(0xffffff, 1000);
 
 	// events
 	this._setEvents();
