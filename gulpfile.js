@@ -97,7 +97,6 @@ function htmlDeploy() {
 function css() {
   const processors = [
     autoprefixer({
-      browsers: ["> 5%"],
       cascade: false
     })
   ];
@@ -118,7 +117,6 @@ function css() {
 function cssDeploy() {
   const processors = [
     autoprefixer({
-      browsers: ["> 5%"],
       cascade: false
     })
   ];
