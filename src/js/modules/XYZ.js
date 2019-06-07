@@ -14,11 +14,11 @@
 				elem: null
 			},
 			plane: {
-				width: 400,
-				height: 400,
+				width: 800,
+				height: 800,
 				wSegments: 1,
 				hSegments: 1,
-				color: 0x0000ff, //string or hex
+				color: 0xff00ff, //string or hex
 				geometry: null,
 				material: null,
 				elem: null
@@ -39,7 +39,10 @@
 		this.lights = [];
 		this.cubes = [];
 		this._cubesMaxScaleY = [];
-		this._cond = this._options.plane.width / this._options.figure.blockSize * this._options.plane.height / this._options.figure.blockSize;
+
+		// improve this logic
+		this._cond = this._options.figure.width / this._options.figure.blockSize * this._options.figure.height / this._options.figure.blockSize;
+
 		this._init();
 	}
 
@@ -50,7 +53,7 @@
 			new THREE.PerspectiveCamera(this._options.camera.fov, this._options.canvas.width / this._options.canvas.height, this._options.camera.near, this._options.camera.far) :
 			new THREE.OrthographicCamera(this._options.canvas.width / -2, this._options.canvas.width / 2, this._options.canvas.height / 2, this._options.canvas.height / -2, this._options.camera.near, this._options.camera.far);
 		// place the camera at x,y,z
-		this._options.camera.elem.position.set(this._options.plane.width / 2, this._options.plane.width / 1.5, this._options.plane.width / 1.5);
+		this._options.camera.elem.position.set(this._options.figure.width / 2, this._options.figure.width / 1.5, this._options.figure.width / 1.5);
 		// camera look at x,y,z
 		this._options.camera.elem.lookAt(0, 0, 0);
 	};
@@ -73,13 +76,13 @@
 		if you don't follow this part, we'll cover geometry and materials
 		in future posts */
 		// THREE.BoxGeometry(width, height, depth, widthSegments, heightSegments, depthSegments)
-		let geometry = new THREE.BoxGeometry(this._options.figure.blockSize - this._options.figure.blockSpacing, this._options.figure.blockSpacing, this._options.figure.blockSize - this._options.figure.blockSpacing);
+		let geometry = new THREE.BoxGeometry(this._options.figure.blockSize - this._options.figure.blockSpacing, 1, this._options.figure.blockSize - this._options.figure.blockSpacing);
 		let material = new THREE.MeshLambertMaterial({
 			color
 		});
 
-		for (let i = -this._options.plane.width / 2 + this._options.figure.blockSize / 2; i < this._options.plane.width / 2; i += this._options.figure.blockSize) {
-			for (let j = this._options.plane.height / 2 - this._options.figure.blockSize / 2; j > -this._options.plane.height / 2; j -= this._options.figure.blockSize) {
+		for (let i = -this._options.figure.width / 2 + this._options.figure.blockSize / 2; i < this._options.figure.width / 2; i += this._options.figure.blockSize) {
+			for (let j = this._options.figure.height / 2 - this._options.figure.blockSize / 2; j > -this._options.figure.height / 2; j -= this._options.figure.blockSize) {
 				this.cubes.push(new THREE.Mesh(geometry, material));
 				this.cubes[this.cubes.length - 1].position.x = i;
 				this.cubes[this.cubes.length - 1].position.z = j;
