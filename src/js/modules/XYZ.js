@@ -1,11 +1,11 @@
-import ColorGUIHelper from "./ColorGUIHelper";
-
 // XYZ(imgUrl : String, imgWidth : Integer, imgHeight : Integer, fullscreen : Boolean)
 export default function XYZ(imgUrl, imgWidth, imgHeight, fullscreen) {
 	this._options = {
 		canvas: {
 			width: 800,
 			height: 450,
+			color: 0x000000,
+			opacity: 1,
 			elem: null
 		},
 		camera: {
@@ -29,6 +29,7 @@ export default function XYZ(imgUrl, imgWidth, imgHeight, fullscreen) {
 		figure: {
 			width: imgWidth * 10 || 400,
 			height: imgHeight * 10 || 400,
+			color: 0xffffff,
 			blockSize: 10,
 			blockSpacing: 0
 		},
@@ -37,7 +38,7 @@ export default function XYZ(imgUrl, imgWidth, imgHeight, fullscreen) {
 	};
 	this._isDone = this.statsEnabled = !1;
 	this._currentStep = this._i = 0;
-	this._scene = this._renderer = null;
+	this.scene = this._renderer = null;
 	this.lights = [];
 	this.cubes = [];
 	this._cubesMaxScaleY = [];
@@ -67,7 +68,7 @@ XYZ.prototype._setupPlane = function () {
 	});
 	this._options.plane.elem = new THREE.Mesh(this._options.plane.geometry, this._options.plane.material);
 	this._options.plane.elem.rotation.x = -0.5 * Math.PI;
-	this._scene.add(this._options.plane.elem);
+	this.scene.add(this._options.plane.elem);
 };
 
 // improve this func
@@ -85,10 +86,8 @@ XYZ.prototype._setupFigure = function (color) {
 	for (let i = -this._options.figure.width / 2 + this._options.figure.blockSize / 2; i < this._options.figure.width / 2; i += this._options.figure.blockSize) {
 		for (let j = this._options.figure.height / 2 - this._options.figure.blockSize / 2; j > -this._options.figure.height / 2; j -= this._options.figure.blockSize) {
 			this.cubes.push(new THREE.Mesh(geometry, material));
-			this.cubes[this.cubes.length - 1].position.x = i;
-			this.cubes[this.cubes.length - 1].position.z = j;
-			this.cubes[this.cubes.length - 1].position.y = -1;
-			this._scene.add(this.cubes[this.cubes.length - 1]);
+			this.cubes[this.cubes.length - 1].position.set(i, -1, j);
+			this.scene.add(this.cubes[this.cubes.length - 1]);
 		}
 	}
 };
@@ -103,50 +102,9 @@ XYZ.prototype._setupLights = function (color, posY) {
 			this.lights.push(new THREE.PointLight(color));
 			/* position the light so it shines on the cube (x, y, z) */
 			this.lights[this.lights.length - 1].position.set(i, posY, j);
-			this._scene.add(this.lights[this.lights.length - 1]);
+			this.scene.add(this.lights[this.lights.length - 1]);
 		}
 	}
-};
-
-// testLight(lightType : String)
-// ambient | hemisphere | directional
-XYZ.prototype.testLight = function (lightType) {
-	const gui = new dat.GUI();
-	const intensity = 1;
-	let light, color;
-	switch (lightType) {
-		case 'ambient':
-			color = 0xFFFFFF;
-			light = new THREE.AmbientLight(color, intensity);
-			gui.addColor(new ColorGUIHelper(light, 'color'), 'value').name('color');
-			gui.add(light, 'intensity', 0, 2, 0.01);
-			break;
-		case 'hemisphere':
-			const skyColor = 0xB1E1FF; // light blue
-			const groundColor = 0xB97A20; // brownish orange
-			light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
-			gui.addColor(new ColorGUIHelper(light, 'color'), 'value').name('skyColor');
-			gui.addColor(new ColorGUIHelper(light, 'groundColor'), 'value').name('groundColor');
-			gui.add(light, 'intensity', 0, 2, 0.01);
-			break;
-		case 'directional':
-			color = 0xFFFFFF;
-			light = new THREE.DirectionalLight(color, intensity);
-			light.position.set(0, 10, 0);
-			light.target.position.set(-5, 0, 0);
-			gui.addColor(new ColorGUIHelper(light, 'color'), 'value').name('color');
-			gui.add(light, 'intensity', 0, 2, 0.01);
-			gui.add(light.target.position, 'x', -10, 10);
-			gui.add(light.target.position, 'z', -10, 10);
-			gui.add(light.target.position, 'y', 0, 10);
-			const helper = new THREE.DirectionalLightHelper(light);
-			this._scene.add(helper);
-			break;
-	}
-
-	if (!light) return;
-	this._scene.add(light);
-	if (light.target) this._scene.add(light.target);
 };
 
 XYZ.prototype._setupControls = function () {
@@ -154,11 +112,12 @@ XYZ.prototype._setupControls = function () {
 	this._controls.update();
 };
 
-// _setupHelpers(size: integer, position: object {x, y, z})
-XYZ.prototype._setupHelpers = function (size, position) {
-	this._axes = new THREE.AxesHelper(size);
-	this._axes.position(position.x, position.y, position.z);
-	this._scene.add(this._axes);
+// addHelpers(size: integer, position: object {x, y, z})
+XYZ.prototype.addHelpers = function (size, position) {
+	this._axes = new THREE.AxesHelper(size || 20);
+	if (!position || position.length != 3) position = [0, 200, 0];
+	this._axes.position.set(...position);
+	this.scene.add(this._axes);
 };
 
 XYZ.prototype.addStats = function () {
@@ -228,18 +187,18 @@ XYZ.prototype._setEvents = function () {
 
 XYZ.prototype._init = function () {
 	//start webGL block code
-	this._scene = new THREE.Scene();
+	this.scene = new THREE.Scene();
 	// add a camera
 	this._setupCamera();
 	this._renderer = new THREE.WebGLRenderer({
 		alpha: true
 	});
-	this._renderer.setClearColor(0x000000, 0);
+	this._renderer.setClearColor(this._options.canvas.color, this._options.canvas.opacity);
 	this._renderer.setSize(this._options.canvas.width, this._options.canvas.height);
 	document.body.appendChild(this._renderer.domElement);
 	this._setupPlane();
 	this._setupControls();
-	this._setupFigure(0xffffff);
+	this._setupFigure(this._options.figure.color);
 	// this._setupLights(0xffffff, 1000);
 
 	// events
@@ -279,7 +238,7 @@ XYZ.prototype._render = function () {
 	if (this.statsEnabled) this._stat.rendererStats.update(this._renderer);
 
 	// render the scene
-	this._renderer.render(this._scene, this._options.camera.elem);
+	this._renderer.render(this.scene, this._options.camera.elem);
 
 	if (this.statsEnabled) this._stat.statsJS.end();
 };
