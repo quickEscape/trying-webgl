@@ -21,7 +21,7 @@ export default function XYZ(imgUrl, imgWidth, imgHeight, fullscreen) {
 			height: 800,
 			wSegments: 1,
 			hSegments: 1,
-			color: 0x000000, //string or hex
+			color: 0xffffff, //string or hex
 			geometry: null,
 			material: null,
 			elem: null
@@ -67,6 +67,7 @@ XYZ.prototype._setupPlane = function () {
 		color: this._options.plane.color
 	});
 	this._options.plane.elem = new THREE.Mesh(this._options.plane.geometry, this._options.plane.material);
+	this._options.plane.elem.receiveShadow = true; //shadow?
 	this._options.plane.elem.rotation.x = -0.5 * Math.PI;
 	this.scene.add(this._options.plane.elem);
 };
@@ -86,8 +87,11 @@ XYZ.prototype._setupFigure = function (color) {
 	for (let i = -this._options.figure.width / 2 + this._options.figure.blockSize / 2; i < this._options.figure.width / 2; i += this._options.figure.blockSize) {
 		for (let j = this._options.figure.height / 2 - this._options.figure.blockSize / 2; j > -this._options.figure.height / 2; j -= this._options.figure.blockSize) {
 			this.cubes.push(new THREE.Mesh(geometry, material));
-			this.cubes[this.cubes.length - 1].position.set(i, -1, j);
-			this.scene.add(this.cubes[this.cubes.length - 1]);
+			let index = this.cubes.length - 1;
+			this.cubes[index].receiveShadow = true;
+			this.cubes[index].castShadow = true;
+			this.cubes[index].position.set(i, -1, j);
+			this.scene.add(this.cubes[index]);
 		}
 	}
 };
@@ -193,6 +197,8 @@ XYZ.prototype._init = function () {
 	this._renderer = new THREE.WebGLRenderer({
 		alpha: true
 	});
+	this._renderer.shadowMap.enabled = true; // enable shadow
+	this._renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 	this._renderer.setClearColor(this._options.canvas.color, this._options.canvas.opacity);
 	this._renderer.setSize(this._options.canvas.width, this._options.canvas.height);
 	document.body.appendChild(this._renderer.domElement);

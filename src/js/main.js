@@ -10,7 +10,7 @@ const Light = new LightTest(WebGL);
 WebGL.start();
 WebGL.addStats();
 WebGL.addHelpers();
-Light.testLight('spot');
-// Light.testLight('point', 0xff0000, 1, [-100, 200, 0]);
-// Light.testLight('point', 0xf0f000, 0.25, [100, 200, 0]);
+// testLight(lightType, lightColor, intensity, position, castShadow)
+// ambient | hemisphere | directional | point | spot
+Light.testLight('point', null, null, null, true);
 // Light.testLight('point', 0xf0ffff, 0.75, [0, 200, 0]);

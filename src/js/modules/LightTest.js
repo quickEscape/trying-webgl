@@ -9,9 +9,9 @@ export default function LightTest(objTHREE) {
 	this._count = 0;
 }
 
-// testLight(lightType : String)
-// ambient | hemisphere | directional
-LightTest.prototype.testLight = function (lightType, lightColor, intensity, position) {
+// testLight(lightType : String, lightColor : Hex, intensity : Float, position : Array[x, y, z], castShadow : Boolean)
+// ambient | hemisphere | directional | point | spot
+LightTest.prototype.testLight = function (lightType, lightColor, intensity, position, castShadow) {
 	this._lightType = lightType || 'directional';
 	this.intensity = intensity || 1;
 	switch (this._lightType) {
@@ -63,6 +63,7 @@ LightTest.prototype.testLight = function (lightType, lightColor, intensity, posi
 
 	if (!this.light) return;
 	if (position) this.light.position.set(...position);
+	if (castShadow && typeof this.light.castShadow != 'undefined') this.light.castShadow = true;
 	this.scene.add(this.light);
 	this._count++;
 	if (this.light.target) this.scene.add(this.light.target);
