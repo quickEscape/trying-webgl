@@ -5,7 +5,7 @@ export default function XYZ(imgUrl, imgWidth, imgHeight, fullscreen) {
 			width: 800,
 			height: 450,
 			color: 0x000000,
-			opacity: 1,
+			opacity: 0,
 			elem: null
 		},
 		camera: {
@@ -34,9 +34,9 @@ export default function XYZ(imgUrl, imgWidth, imgHeight, fullscreen) {
 			blockSpacing: 0
 		},
 		stepsToDone: 125,
-		imgUrl: imgUrl || '../img/Untitled-1.png'
+		imgUrl: imgUrl || '../img/webgl-map.png'
 	};
-	this._isDone = this.statsEnabled = !1;
+	this._isDone = this.statsEnabled = false;
 	this._currentStep = this._i = 0;
 	this.scene = this._renderer = null;
 	this.lights = [];
@@ -60,11 +60,11 @@ XYZ.prototype._setupCamera = function () {
 	this._options.camera.elem.lookAt(0, 0, 0);
 };
 
-XYZ.prototype._setupPlane = function () {
+XYZ.prototype._setupPlane = function (color) {
 	//THREE.PlaneGeometry (width, height, widthSegments, heightSegments)
 	this._options.plane.geometry = new THREE.PlaneGeometry(this._options.plane.width, this._options.plane.height, this._options.plane.wSegments, this._options.plane.hSegments);
-	this._options.plane.material = new THREE.MeshBasicMaterial({
-		color: this._options.plane.color
+	this._options.plane.material = new THREE.MeshLambertMaterial({
+		color
 	});
 	this._options.plane.elem = new THREE.Mesh(this._options.plane.geometry, this._options.plane.material);
 	this._options.plane.elem.receiveShadow = true; //shadow?
@@ -89,7 +89,7 @@ XYZ.prototype._setupFigure = function (color) {
 			this.cubes.push(new THREE.Mesh(geometry, material));
 			let index = this.cubes.length - 1;
 			this.cubes[index].receiveShadow = true;
-			this.cubes[index].castShadow = true;
+			// this.cubes[index].castShadow = true;
 			this.cubes[index].position.set(i, -1, j);
 			this.scene.add(this.cubes[index]);
 		}
@@ -143,7 +143,7 @@ XYZ.prototype.addStats = function () {
 	// add stat in DOM
 	document.body.appendChild(this._stat.rendererStats.domElement);
 	document.body.appendChild(this._stat.statsJS.dom);
-	this.statsEnabled = !0;
+	this.statsEnabled = true;
 };
 
 // fignya kakaya-to :(
@@ -170,8 +170,16 @@ XYZ.prototype.start = function () {
 
 	loadImage
 		.then((res) => {
-			for (let i = 0; i < res.data.length; i += 4)
-				this._imageMap.push(res.data[i] == 255 ? 0 : res.data[i + 3] / 255);
+			for (let i = 0; i < res.data.length; i += 4) {
+				if (res.data[i] == 255) {
+					this._imageMap.push(0);
+				} else {
+					let val = res.data[i + 3] / 255;
+					this._imageMap.push(val);
+					if (val > 0.5)
+						this.cubes[this._imageMap.length - 1].castShadow = true;
+				}
+			}
 			this._render();
 		})
 		.catch((error) => {
@@ -202,7 +210,7 @@ XYZ.prototype._init = function () {
 	this._renderer.setClearColor(this._options.canvas.color, this._options.canvas.opacity);
 	this._renderer.setSize(this._options.canvas.width, this._options.canvas.height);
 	document.body.appendChild(this._renderer.domElement);
-	this._setupPlane();
+	this._setupPlane(this._options.plane.color);
 	this._setupControls();
 	this._setupFigure(this._options.figure.color);
 	// this._setupLights(0xffffff, 1000);

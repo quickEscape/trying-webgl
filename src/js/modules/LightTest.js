@@ -63,7 +63,16 @@ LightTest.prototype.testLight = function (lightType, lightColor, intensity, posi
 
 	if (!this.light) return;
 	if (position) this.light.position.set(...position);
-	if (castShadow && typeof this.light.castShadow != 'undefined') this.light.castShadow = true;
+	if (castShadow && typeof this.light.castShadow != 'undefined') {
+		//Set up shadow properties for the light
+		this.light.castShadow = true;
+		this.light.shadow.mapSize.width = 1024; // default 512
+		this.light.shadow.mapSize.height = 1024; // default 512
+		this.light.shadow.camera.near = 0.5; // default 0.5
+		this.light.shadow.camera.far = 1000; // default 500
+		this.light.shadow.radius = 25;
+		// this.light.shadow.bias = 0.000001; // default 0
+	}
 	this.scene.add(this.light);
 	this._count++;
 	if (this.light.target) this.scene.add(this.light.target);
@@ -81,8 +90,8 @@ LightTest.prototype.testLight = function (lightType, lightColor, intensity, posi
 			break;
 		case 'spot':
 			this.addHelper();
-			this.lightColor = lightColor || 0xffffff;
-			this.light = new THREE.SpotLight(this.lightColor, this.intensity);
+			makeXYZGUI(this._gui, this.light.position, 'position', this.updateLight.bind(this));
+			makeXYZGUI(this._gui, this.light.target.position, 'target', this.updateLight.bind(this));
 			break;
 	}
 };
