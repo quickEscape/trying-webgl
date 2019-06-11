@@ -12,5 +12,6 @@ WebGL.addStats();
 WebGL.addHelpers();
 // testLight(lightType, lightColor, intensity, position, castShadow)
 // ambient | hemisphere | directional | point | spot
-Light.testLight('point', null, null, null, true);
-// Light.testLight('point', 0xf0ffff, 0.75, [0, 200, 0]);
+Light.testLight('point', 0xa3f208, 0.5, [0, 750, 0], true);
+Light.testLight('ambient', 0xffffff, 0.5, [0, 500, 0]);
+Light.testLight('directional', 0xf28a30, 0.5, [-200, 300, 200]);
