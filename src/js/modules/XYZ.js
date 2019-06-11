@@ -89,7 +89,6 @@ XYZ.prototype._setupFigure = function (color) {
 			this.cubes.push(new THREE.Mesh(geometry, material));
 			let index = this.cubes.length - 1;
 			this.cubes[index].receiveShadow = true;
-			// this.cubes[index].castShadow = true;
 			this.cubes[index].position.set(i, -1, j);
 			this.scene.add(this.cubes[index]);
 		}
