@@ -23,8 +23,8 @@ LightTest.prototype.testLight = function (lightType, lightColor, intensity, posi
 			this._gui.add(this.light, 'intensity', 0, 2, 0.01);
 			break;
 		case 'hemisphere':
-			const skyColor = 0xB1E1FF; // light blue
-			const groundColor = 0xB97A20; // brownish orange
+			const skyColor = 0x0019ff; // light blue
+			const groundColor = 0x000000; // brownish orange
 			this.light = new THREE.HemisphereLight(skyColor, groundColor, this.intensity);
 			if (this._count) break;
 			this._gui.addColor(new ColorGUIHelper(this.light, 'color'), 'value').name('skyColor');
@@ -70,8 +70,8 @@ LightTest.prototype.testLight = function (lightType, lightColor, intensity, posi
 		this.light.shadow.mapSize.height = 1024; // default 512
 		this.light.shadow.camera.near = 0.5; // default 0.5
 		this.light.shadow.camera.far = 1000; // default 500
-		this.light.shadow.radius = 25;
-		// this.light.shadow.bias = 0.000001; // default 0
+		this.light.shadow.radius = 16;
+		// this.light.shadowDarkness = 0.1;
 	}
 	this.scene.add(this.light);
 	this._count++;

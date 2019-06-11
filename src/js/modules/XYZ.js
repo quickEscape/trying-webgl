@@ -3,7 +3,7 @@ export default function XYZ(imgUrl, imgWidth, imgHeight, fullscreen) {
 	this._options = {
 		canvas: {
 			width: 800,
-			height: 450,
+			height: 800,
 			color: 0x000000,
 			opacity: 0,
 			elem: null
@@ -33,7 +33,7 @@ export default function XYZ(imgUrl, imgWidth, imgHeight, fullscreen) {
 			blockSize: 10,
 			blockSpacing: 0
 		},
-		stepsToDone: 125,
+		stepsToDone: 100,
 		imgUrl: imgUrl || '../img/webgl-map.png'
 	};
 	this._isDone = this.statsEnabled = false;
@@ -48,16 +48,28 @@ export default function XYZ(imgUrl, imgWidth, imgHeight, fullscreen) {
 	this._init();
 }
 
-XYZ.prototype._setupCamera = function () {
+XYZ.prototype._setupCamera = function (type) {
 	// THREE.PerspectiveCamera(fov, aspect, near, far)
 	// THREE.OrthographicCamera(left, right, top, bottom, near, far)
-	this._options.camera.elem = this._options.camera.type == 'perspective' ?
-		new THREE.PerspectiveCamera(this._options.camera.fov, this._options.canvas.width / this._options.canvas.height, this._options.camera.near, this._options.camera.far) :
-		new THREE.OrthographicCamera(this._options.canvas.width / -2, this._options.canvas.width / 2, this._options.canvas.height / 2, this._options.canvas.height / -2, this._options.camera.near, this._options.camera.far);
-	// place the camera at x,y,z
-	this._options.camera.elem.position.set(this._options.figure.width / 2, this._options.figure.width / 1.5, this._options.figure.width / 1.5);
-	// camera look at x,y,z
-	this._options.camera.elem.lookAt(0, 0, 0);
+	if (type) {
+		this._options.camera.elem = new THREE.PerspectiveCamera(this._options.camera.fov, this._options.canvas.width / this._options.canvas.height, this._options.camera.near, this._options.camera.far);
+		this._options.camera.elem.position.set(157.60072053425966, 227.03687931052735, -166.8809390570799);
+		this._options.camera.elem.rotateX(-2.3549216235704318);
+		this._options.camera.elem.rotateY(0.5465953228917613);
+		this._options.camera.elem.rotateZ(2.6612027337138793);
+		this._options.camera.elem.zoom = this._options.canvas.width / 570;
+	} else {
+		this._options.camera.elem = new THREE.OrthographicCamera(this._options.canvas.width / -2, this._options.canvas.width / 2, this._options.canvas.height / 2, this._options.canvas.height / -2, this._options.camera.near, this._options.camera.far);
+		this._options.camera.elem.position.set(143.9243554887908, 260.90844701638304, -186.24183043100288);
+		this._options.camera.elem.rotateX(-2.2660822143735166);
+		this._options.camera.elem.rotateY(0.4389156948821847);
+		this._options.camera.elem.rotateZ(2.6704673429060937);
+		this._options.camera.elem.zoom = 1.507;
+	}
+	// // place the camera at x,y,z
+	// this._options.camera.elem.position.set(180, 300, -136);
+	// // camera look at x,y,z
+	// this._options.camera.elem.lookAt(0, 0, 0);
 };
 
 XYZ.prototype._setupPlane = function (color) {
@@ -66,6 +78,10 @@ XYZ.prototype._setupPlane = function (color) {
 	this._options.plane.material = new THREE.MeshLambertMaterial({
 		color
 	});
+
+	// this._options.plane.material = new THREE.ShadowMaterial();
+	// this._options.plane.material.opacity = 0.25;
+
 	this._options.plane.elem = new THREE.Mesh(this._options.plane.geometry, this._options.plane.material);
 	this._options.plane.elem.receiveShadow = true; //shadow?
 	this._options.plane.elem.rotation.x = -0.5 * Math.PI;
@@ -87,10 +103,8 @@ XYZ.prototype._setupFigure = function (color) {
 	for (let i = -this._options.figure.width / 2 + this._options.figure.blockSize / 2; i < this._options.figure.width / 2; i += this._options.figure.blockSize) {
 		for (let j = this._options.figure.height / 2 - this._options.figure.blockSize / 2; j > -this._options.figure.height / 2; j -= this._options.figure.blockSize) {
 			this.cubes.push(new THREE.Mesh(geometry, material));
-			let index = this.cubes.length - 1;
-			this.cubes[index].receiveShadow = true;
-			this.cubes[index].position.set(i, -1, j);
-			this.scene.add(this.cubes[index]);
+			this.cubes[this.cubes.length - 1].position.set(i, -1, j);
+			this.scene.add(this.cubes[this.cubes.length - 1]);
 		}
 	}
 };
@@ -169,14 +183,16 @@ XYZ.prototype.start = function () {
 
 	loadImage
 		.then((res) => {
-			for (let i = 0; i < res.data.length; i += 4) {
-				if (res.data[i] == 255) {
+			for (let i = 3; i < res.data.length; i += 4) {
+				if (res.data[i] === 0) {
 					this._imageMap.push(0);
+					this.scene.remove(this.cubes[this._imageMap.length - 1]);
 				} else {
-					let val = res.data[i + 3] / 255;
+					let val = res.data[i] / 255;
 					this._imageMap.push(val);
 					if (val > 0.5)
 						this.cubes[this._imageMap.length - 1].castShadow = true;
+					this.cubes[this._imageMap.length - 1].receiveShadow = true;
 				}
 			}
 			this._render();
@@ -188,7 +204,9 @@ XYZ.prototype.start = function () {
 
 XYZ.prototype._setEvents = function () {
 	this._renderer.domElement.ondblclick = () => {
-		// console.log(this._options.camera.elem.position);
+		console.log(this._options.camera.elem.position);
+		console.log(this._options.camera.elem.rotation);
+		console.log(this._options.camera.elem.zoom);
 		this._isDone = !this._isDone;
 		this._currentStep = 0;
 		for (let i = 0; i < this._figureSize; i++)
@@ -202,7 +220,8 @@ XYZ.prototype._init = function () {
 	// add a camera
 	this._setupCamera();
 	this._renderer = new THREE.WebGLRenderer({
-		alpha: true
+		alpha: true,
+		antialias: true
 	});
 	this._renderer.shadowMap.enabled = true; // enable shadow
 	this._renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
