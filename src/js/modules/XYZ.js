@@ -27,10 +27,10 @@ export default function XYZ(imgUrl, imgWidth, imgHeight, fullscreen) {
 			elem: null
 		},
 		figure: {
-			width: imgWidth * 10 || 400,
-			height: imgHeight * 10 || 400,
+			width: imgWidth * 8 || 320,
+			height: imgHeight * 8 || 320,
 			color: 0xffffff,
-			blockSize: 10,
+			blockSize: 8,
 			blockSpacing: 0
 		},
 		stepsToDone: 100,
@@ -64,7 +64,7 @@ XYZ.prototype._setupCamera = function (type) {
 		this._options.camera.elem.rotateX(-2.2660822143735166);
 		this._options.camera.elem.rotateY(0.4389156948821847);
 		this._options.camera.elem.rotateZ(2.6704673429060937);
-		this._options.camera.elem.zoom = 1.507;
+		this._options.camera.elem.zoom = 1.75;
 	}
 	// // place the camera at x,y,z
 	// this._options.camera.elem.position.set(180, 300, -136);
@@ -187,6 +187,8 @@ XYZ.prototype.start = function () {
 				if (res.data[i] === 0) {
 					this._imageMap.push(0);
 					this.scene.remove(this.cubes[this._imageMap.length - 1]);
+					this.cubes[this._imageMap.length - 1].geometry.dispose();
+					this.cubes[this._imageMap.length - 1].material.dispose();
 				} else {
 					let val = res.data[i] / 255;
 					this._imageMap.push(val);
@@ -221,9 +223,10 @@ XYZ.prototype._init = function () {
 	this._setupCamera();
 	this._renderer = new THREE.WebGLRenderer({
 		alpha: true,
-		antialias: true
+		// antialias: true
 	});
 	this._renderer.shadowMap.enabled = true; // enable shadow
+	// this._renderer.physicallyCorrectLights = true; // enable physical lights
 	this._renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 	this._renderer.setClearColor(this._options.canvas.color, this._options.canvas.opacity);
 	this._renderer.setSize(this._options.canvas.width, this._options.canvas.height);

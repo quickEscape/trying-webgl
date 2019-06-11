@@ -70,7 +70,7 @@ LightTest.prototype.testLight = function (lightType, lightColor, intensity, posi
 		this.light.shadow.mapSize.height = 1024; // default 512
 		this.light.shadow.camera.near = 0.5; // default 0.5
 		this.light.shadow.camera.far = 1000; // default 500
-		this.light.shadow.radius = 16;
+		// this.light.shadow.radius = 8;
 		// this.light.shadowDarkness = 0.1;
 	}
 	this.scene.add(this.light);
