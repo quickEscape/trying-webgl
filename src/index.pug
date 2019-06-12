@@ -7,7 +7,9 @@ html(lang="en")
 		title WebGL Learning
 		link(rel="stylesheet", href="css/main.css")
 	body
-		script(src='https://cdnjs.cloudflare.com/ajax/libs/three.js/104/three.min.js')
+		form.control.js-control(action="#", method="post")
+			button(type="button", data-action="resetCamera") reset camera
+		script(src='https://cdnjs.cloudflare.com/ajax/libs/three.js/105/three.min.js')
 		script(src='js/OrbitControl.js')
 		//- script(src='https://cdnjs.cloudflare.com/ajax/libs/tween.js/17.4.0/Tween.min.js')
 		script(src='js/stats.js')

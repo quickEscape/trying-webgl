@@ -9,11 +9,46 @@ export default function XYZ(imgUrl, imgWidth, imgHeight, fullscreen) {
 			elem: null
 		},
 		camera: {
-			type: 'perspective',
-			fov: 75,
-			aspect: 16 / 9,
-			near: 0.1,
-			far: 1000,
+			'perspective': {
+				fov: 45,
+				aspect: 16 / 9,
+				near: 0.1,
+				far: 1000,
+				initialSettings: {
+					position: {
+						x: 200,
+						y: 300,
+						z: -200
+					},
+					rotation: {
+						x: -2.3549216235704318,
+						y: 0.5465953228917613,
+						z: 2.6612027337138793
+					},
+					zoom: 1.40
+				}
+			},
+			'orthographic': {
+				left: -400,
+				top: 400,
+				right: 400,
+				bottom: -400,
+				near: 5,
+				far: 1000,
+				initialSettings: {
+					position: {
+						x: 145,
+						y: 260,
+						z: -185
+					},
+					rotation: {
+						x: -2.2660822143735166,
+						y: 0.4389156948821847,
+						z: 2.6704673429060937
+					},
+					zoom: 1.75
+				}
+			},
 			elem: null
 		},
 		plane: {
@@ -51,20 +86,20 @@ export default function XYZ(imgUrl, imgWidth, imgHeight, fullscreen) {
 XYZ.prototype._setupCamera = function (type) {
 	// THREE.PerspectiveCamera(fov, aspect, near, far)
 	// THREE.OrthographicCamera(left, right, top, bottom, near, far)
-	if (type) {
-		this._options.camera.elem = new THREE.PerspectiveCamera(this._options.camera.fov, this._options.canvas.width / this._options.canvas.height, this._options.camera.near, this._options.camera.far);
-		this._options.camera.elem.position.set(157.60072053425966, 227.03687931052735, -166.8809390570799);
-		this._options.camera.elem.rotateX(-2.3549216235704318);
-		this._options.camera.elem.rotateY(0.5465953228917613);
-		this._options.camera.elem.rotateZ(2.6612027337138793);
-		this._options.camera.elem.zoom = this._options.canvas.width / 570;
+	if (!type) {
+		this._options.camera.elem = new THREE.PerspectiveCamera(this._options.camera.perspective.fov, this._options.canvas.width / this._options.canvas.height, this._options.camera.perspective.near, this._options.camera.perspective.far);
+		this._options.camera.elem.position.set(this._options.camera.perspective.initialSettings.position.x, this._options.camera.perspective.initialSettings.position.y, this._options.camera.perspective.initialSettings.position.z);
+		this._options.camera.elem.rotateX(this._options.camera.perspective.initialSettings.rotation.x);
+		this._options.camera.elem.rotateY(this._options.camera.perspective.initialSettings.rotation.y);
+		this._options.camera.elem.rotateZ(this._options.camera.perspective.initialSettings.rotation.z);
+		this._options.camera.elem.zoom = this._options.camera.perspective.initialSettings.zoom;
 	} else {
-		this._options.camera.elem = new THREE.OrthographicCamera(this._options.canvas.width / -2, this._options.canvas.width / 2, this._options.canvas.height / 2, this._options.canvas.height / -2, this._options.camera.near, this._options.camera.far);
-		this._options.camera.elem.position.set(143.9243554887908, 260.90844701638304, -186.24183043100288);
-		this._options.camera.elem.rotateX(-2.2660822143735166);
-		this._options.camera.elem.rotateY(0.4389156948821847);
-		this._options.camera.elem.rotateZ(2.6704673429060937);
-		this._options.camera.elem.zoom = 1.75;
+		this._options.camera.elem = new THREE.OrthographicCamera(this._options.canvas.width / -2, this._options.canvas.width / 2, this._options.canvas.height / 2, this._options.canvas.height / -2, this._options.camera.orthographic.near, this._options.camera.orthographic.far);
+		this._options.camera.elem.position.set(this._options.camera.orthographic.initialSettings.position.x, this._options.camera.orthographic.initialSettings.position.y, this._options.camera.orthographic.initialSettings.position.z);
+		this._options.camera.elem.rotateX(this._options.camera.orthographic.initialSettings.rotation.x);
+		this._options.camera.elem.rotateY(this._options.camera.orthographic.initialSettings.rotation.y);
+		this._options.camera.elem.rotateZ(this._options.camera.orthographic.initialSettings.rotation.z);
+		this._options.camera.elem.zoom = this._options.camera.orthographic.initialSettings.zoom;
 	}
 	// // place the camera at x,y,z
 	// this._options.camera.elem.position.set(180, 300, -136);
@@ -190,10 +225,8 @@ XYZ.prototype.start = function () {
 					this.cubes[this._imageMap.length - 1].geometry.dispose();
 					this.cubes[this._imageMap.length - 1].material.dispose();
 				} else {
-					let val = res.data[i] / 255;
-					this._imageMap.push(val);
-					if (val > 0.5)
-						this.cubes[this._imageMap.length - 1].castShadow = true;
+					this._imageMap.push(res.data[i] / 255);
+					this.cubes[this._imageMap.length - 1].castShadow = true;
 					this.cubes[this._imageMap.length - 1].receiveShadow = true;
 				}
 			}
@@ -220,7 +253,7 @@ XYZ.prototype._init = function () {
 	//start webGL block code
 	this.scene = new THREE.Scene();
 	// add a camera
-	this._setupCamera();
+	this._setupCamera(1);
 	this._renderer = new THREE.WebGLRenderer({
 		alpha: true,
 		// antialias: true

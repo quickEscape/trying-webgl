@@ -2,11 +2,16 @@ import ColorGUIHelper from "./ColorGUIHelper";
 import DegRadHelper from "./DegRadHelper";
 
 export default function LightTest(objTHREE) {
+	this._objTHREE = objTHREE;
 	this.scene = objTHREE.scene;
+	this.camera = objTHREE._options.camera.elem;
+	this.camera.initialSettings = objTHREE._options.camera[this.camera.isPerspectiveCamera ? 'perspective' : 'orthographic'].initialSettings;
 	this._gui = new dat.GUI();
 	this.intensity = 1;
 	this._lightType = null;
 	this._count = 0;
+
+	this._setEvents();
 }
 
 // testLight(lightType : String, lightColor : Hex, intensity : Float, position : Array[x, y, z], castShadow : Boolean)
@@ -39,14 +44,11 @@ LightTest.prototype.testLight = function (lightType, lightColor, intensity, posi
 			if (this._count) break;
 			this._gui.addColor(new ColorGUIHelper(this.light, 'color'), 'value').name('color');
 			this._gui.add(this.light, 'intensity', 0, 2, 0.01);
-			this._gui.add(this.light.target.position, 'x', -500, 500);
-			this._gui.add(this.light.target.position, 'z', -500, 500);
-			this._gui.add(this.light.target.position, 'y', 0, 750);
 			break;
 		case 'point':
 			this.lightColor = lightColor || 0xFFFFFF;
 			this.light = new THREE.PointLight(this.lightColor, this.intensity);
-			this.light.position.set(100, 200, 0);
+			this.light.position.copy(this.camera.position);
 			if (this._count) break;
 			this._gui.addColor(new ColorGUIHelper(this.light, 'color'), 'value').name('color');
 			this._gui.add(this.light, 'intensity', 0, 2, 0.01);
@@ -68,10 +70,29 @@ LightTest.prototype.testLight = function (lightType, lightColor, intensity, posi
 		this.light.castShadow = true;
 		this.light.shadow.mapSize.width = 1024; // default 512
 		this.light.shadow.mapSize.height = 1024; // default 512
-		this.light.shadow.camera.near = 0.5; // default 0.5
-		this.light.shadow.camera.far = 1000; // default 500
-		// this.light.shadow.radius = 8;
+		this.light.shadow.camera.near = 10; // default 0.5
+		this.light.shadow.camera.far = 1024 + 256; // default 500
+
+		if (this.light.shadow.camera.type != 'OrthographicCamera') {
+			let f = this._gui.addFolder('camera');
+			f.add(this.light.shadow.camera, 'fov', 0, 120, 1);
+			folder.open();
+		}
+
+		// this.light.shadow.camera.fov = 32;
+		// this.light.shadow.radius = 4;
 		// this.light.shadowDarkness = 0.1;
+
+		if (this.light.isDirectionalLight) {
+			this.light.shadow.camera.left = -256;
+			this.light.shadow.camera.right = 256;
+			this.light.shadow.camera.top = 256;
+			this.light.shadow.camera.bottom = -256;
+			// this.light.shadow.bias = 0.000001;
+		}
+
+		let helper = new THREE.CameraHelper(this.light.shadow.camera);
+		this.scene.add(helper);
 	}
 	this.scene.add(this.light);
 	this._count++;
@@ -119,10 +140,44 @@ LightTest.prototype.updateLight = function () {
 	this.helper.update();
 };
 
+LightTest.prototype.resetCamera = function () {
+	this.camera.position.set(this.camera.initialSettings.position.x, this.camera.initialSettings.position.y, this.camera.initialSettings.position.z);
+	this.camera.rotateX(this.camera.initialSettings.rotation.x);
+	this.camera.rotateY(this.camera.initialSettings.rotation.y);
+	this.camera.rotateZ(this.camera.initialSettings.rotation.z);
+	this.camera.zoom = this.camera.initialSettings.zoom;
+};
+
+LightTest.prototype._setEvents = function () {
+	let controlBlock = document.querySelector('.js-control');
+	let keyCodes = {
+		82: 'resetCamera'
+	};
+	if (controlBlock) {
+		controlBlock.style.left = this._objTHREE._renderer.domElement.offsetLeft + 'px';
+		controlBlock.addEventListener('click', (event) => {
+			if (event.target.tagName != 'BUTTON') return;
+			switch (event.target.dataset.action) {
+				case 'resetCamera':
+					this.resetCamera();
+					break;
+			}
+		});
+	}
+	document.addEventListener('keydown', (event) => {
+		switch (keyCodes[event.keyCode]) {
+			case 'resetCamera':
+				this.resetCamera();
+				break;
+		}
+	});
+};
+
+
 function makeXYZGUI(gui, vector3, name, onChangeFn) {
 	const folder = gui.addFolder(name);
-	folder.add(vector3, 'x', -500, 500).onChange(onChangeFn);
-	folder.add(vector3, 'z', -500, 500).onChange(onChangeFn);
-	folder.add(vector3, 'y', 0, 750).onChange(onChangeFn);
+	folder.add(vector3, 'x', -750, 750).onChange(onChangeFn);
+	folder.add(vector3, 'z', -750, 750).onChange(onChangeFn);
+	folder.add(vector3, 'y', 0, 1000).onChange(onChangeFn);
 	folder.open();
 }
