@@ -20,11 +20,11 @@
   "browserslist": "> 5%",
   "devDependencies": {
     "@babel/core": "^7.4.4",
+    "@babel/plugin-proposal-object-rest-spread": "^7.4.4",
     "@babel/preset-env": "^7.4.4",
     "acorn": "^6.1.1",
     "autoprefixer": "^9.5.1",
     "babel-loader": "^8.0.6",
-    "@babel/plugin-proposal-object-rest-spread": "^7.4.4",
     "babel-preset-env": "^1.7.0",
     "browser-sync": "^2.26.5",
     "del": "^4.1.1",
@@ -48,6 +48,7 @@
     "webpack-stream": "^5.2.1"
   },
   "dependencies": {
-    "object-fit-images": "^3.2.4"
+    "object-fit-images": "^3.2.4",
+    "socket.io": "^2.2.0"
   }
 }
