@@ -25,16 +25,16 @@ export default function XYZ(imgUrl, imgWidth, imgHeight, fullscreen) {
 						y: 0.5465953228917613,
 						z: 2.6612027337138793
 					},
-					zoom: 1.40
+					zoom: 2.75
 				}
 			},
 			'orthographic': {
-				left: -400,
-				top: 400,
-				right: 400,
-				bottom: -400,
-				near: 5,
-				far: 1000,
+				left: -256,
+				top: 256,
+				right: 256,
+				bottom: -256,
+				near: 224,
+				far: 480,
 				initialSettings: {
 					position: {
 						x: 145,
@@ -46,7 +46,7 @@ export default function XYZ(imgUrl, imgWidth, imgHeight, fullscreen) {
 						y: 0.4389156948821847,
 						z: 2.6704673429060937
 					},
-					zoom: 1.75
+					zoom: 3.25
 				}
 			},
 			elem: null
@@ -62,13 +62,13 @@ export default function XYZ(imgUrl, imgWidth, imgHeight, fullscreen) {
 			elem: null
 		},
 		figure: {
-			width: imgWidth * 8 || 320,
-			height: imgHeight * 8 || 320,
+			width: imgWidth * 4 || 160,
+			height: imgHeight * 4 || 160,
 			color: 0xffffff,
-			blockSize: 8,
+			blockSize: 4,
 			blockSpacing: 0
 		},
-		stepsToDone: 100,
+		stepsToDone: 64,
 		imgUrl: imgUrl || '../img/webgl-map.png'
 	};
 	this._isDone = this.statsEnabled = false;
@@ -239,9 +239,9 @@ XYZ.prototype.start = function () {
 
 XYZ.prototype._setEvents = function () {
 	this._renderer.domElement.ondblclick = () => {
-		console.log(this._options.camera.elem.position);
-		console.log(this._options.camera.elem.rotation);
-		console.log(this._options.camera.elem.zoom);
+		// console.log(this._options.camera.elem.position);
+		// console.log(this._options.camera.elem.rotation);
+		// console.log(this._options.camera.elem.zoom);
 		this._isDone = !this._isDone;
 		this._currentStep = 0;
 		for (let i = 0; i < this._figureSize; i++)
@@ -253,7 +253,7 @@ XYZ.prototype._init = function () {
 	//start webGL block code
 	this.scene = new THREE.Scene();
 	// add a camera
-	this._setupCamera(1);
+	this._setupCamera(1); // no args for perspective camera
 	this._renderer = new THREE.WebGLRenderer({
 		alpha: true,
 		// antialias: true
