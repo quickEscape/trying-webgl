@@ -142,6 +142,7 @@ XYZ.prototype._setupPlane = function (color) {
 // improve this func
 // _setupFigure(color: string or hex)
 XYZ.prototype._setupFigure = function (color) {
+	this._figure = new THREE.Group();
 	/* we're creating a cube to put in our scene - don't worry
 	if you don't follow this part, we'll cover geometry and materials
 	in future posts */
@@ -156,9 +157,11 @@ XYZ.prototype._setupFigure = function (color) {
 		for (let j = this._options.figure.height / 2 - this._options.figure.blockSize / 2; j > -this._options.figure.height / 2; j -= this._options.figure.blockSize) {
 			this.cubes.push(new THREE.Mesh(geometry, material));
 			this.cubes[this.cubes.length - 1].position.set(i, -1, j);
-			this.scene.add(this.cubes[this.cubes.length - 1]);
+			this._figure.add(this.cubes[this.cubes.length - 1]);
 		}
 	}
+
+	this.scene.add(this._figure);
 };
 
 // important to improve this func
