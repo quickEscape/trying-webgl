@@ -83,24 +83,39 @@ export default function XYZ(imgUrl, imgWidth, imgHeight, fullscreen) {
 	this._init();
 }
 
+XYZ.prototype._createRenderer = function () {
+	this._renderer = new THREE.WebGLRenderer({
+		alpha: true,
+		antialias: true
+	});
+
+	this._renderer.shadowMap.enabled = true; // enable shadow
+	this._renderer.physicallyCorrectLights = true; // enable physical lights
+	this._renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+
+	this._renderer.setClearColor(this._options.canvas.color, this._options.canvas.opacity);
+	this._renderer.setSize(this._options.canvas.width, this._options.canvas.height);
+	this._renderer.setPixelRatio(devicePixelRatio);
+
+	document.body.appendChild(this._renderer.domElement);
+};
+
 XYZ.prototype._setupCamera = function (type) {
 	// THREE.PerspectiveCamera(fov, aspect, near, far)
 	// THREE.OrthographicCamera(left, right, top, bottom, near, far)
-	if (!type) {
+	if (!type || type == 'perspective') {
+		type = 'perspective';
 		this._options.camera.elem = new THREE.PerspectiveCamera(this._options.camera.perspective.fov, this._options.canvas.width / this._options.canvas.height, this._options.camera.perspective.near, this._options.camera.perspective.far);
-		this._options.camera.elem.position.set(this._options.camera.perspective.initialSettings.position.x, this._options.camera.perspective.initialSettings.position.y, this._options.camera.perspective.initialSettings.position.z);
-		this._options.camera.elem.rotateX(this._options.camera.perspective.initialSettings.rotation.x);
-		this._options.camera.elem.rotateY(this._options.camera.perspective.initialSettings.rotation.y);
-		this._options.camera.elem.rotateZ(this._options.camera.perspective.initialSettings.rotation.z);
-		this._options.camera.elem.zoom = this._options.camera.perspective.initialSettings.zoom;
 	} else {
+		type = 'orthographic';
 		this._options.camera.elem = new THREE.OrthographicCamera(this._options.canvas.width / -2, this._options.canvas.width / 2, this._options.canvas.height / 2, this._options.canvas.height / -2, this._options.camera.orthographic.near, this._options.camera.orthographic.far);
-		this._options.camera.elem.position.set(this._options.camera.orthographic.initialSettings.position.x, this._options.camera.orthographic.initialSettings.position.y, this._options.camera.orthographic.initialSettings.position.z);
-		this._options.camera.elem.rotateX(this._options.camera.orthographic.initialSettings.rotation.x);
-		this._options.camera.elem.rotateY(this._options.camera.orthographic.initialSettings.rotation.y);
-		this._options.camera.elem.rotateZ(this._options.camera.orthographic.initialSettings.rotation.z);
-		this._options.camera.elem.zoom = this._options.camera.orthographic.initialSettings.zoom;
 	}
+	this._options.camera.elem.position.set(this._options.camera[type].initialSettings.position.x, this._options.camera[type].initialSettings.position.y, this._options.camera[type].initialSettings.position.z);
+	this._options.camera.elem.rotateX(this._options.camera[type].initialSettings.rotation.x);
+	this._options.camera.elem.rotateY(this._options.camera[type].initialSettings.rotation.y);
+	this._options.camera.elem.rotateZ(this._options.camera[type].initialSettings.rotation.z);
+	this._options.camera.elem.zoom = this._options.camera[type].initialSettings.zoom;
+
 	// // place the camera at x,y,z
 	// this._options.camera.elem.position.set(180, 300, -136);
 	// // camera look at x,y,z
@@ -197,22 +212,22 @@ XYZ.prototype.addStats = function () {
 };
 
 // fignya kakaya-to :(
-XYZ.prototype._randomTwitching = function (frequency) {
-	if (!frequency) frequency = 40;
-	this._i++;
-	if (this._i % frequency != 0) return;
-	for (let i = 0; i < this._figureSize; i++) {
-		if (!this._imageMap[i]) continue;
-		if (this.cubes[i].scale.y < this._cubesMaxScaleY[i][0]) {
-			this._cubesNewScaleY[i] = Math.random() * this._imageMap[i];
-		} else if (this.cubes[i].scale.y > this._cubesMaxScaleY[i][1]) {
-			this._cubesNewScaleY[i] = -Math.random() * this._imageMap[i];
-		} else {
-			this._cubesNewScaleY[i] = Math.random() * (this._imageMap[i] + this._imageMap[i]) - this._imageMap[i];
-		}
-		scaleY(this.cubes[i], this.cubes[i].scale.y + this._cubesNewScaleY[i] * 100 / frequency);
-	}
-};
+// XYZ.prototype._randomTwitching = function (frequency) {
+// 	if (!frequency) frequency = 40;
+// 	this._i++;
+// 	if (this._i % frequency != 0) return;
+// 	for (let i = 0; i < this._figureSize; i++) {
+// 		if (!this._imageMap[i]) continue;
+// 		if (this.cubes[i].scale.y < this._cubesMaxScaleY[i][0]) {
+// 			this._cubesNewScaleY[i] = Math.random() * this._imageMap[i];
+// 		} else if (this.cubes[i].scale.y > this._cubesMaxScaleY[i][1]) {
+// 			this._cubesNewScaleY[i] = -Math.random() * this._imageMap[i];
+// 		} else {
+// 			this._cubesNewScaleY[i] = Math.random() * (this._imageMap[i] + this._imageMap[i]) - this._imageMap[i];
+// 		}
+// 		scaleY(this.cubes[i], this.cubes[i].scale.y + this._cubesNewScaleY[i] * 100 / frequency);
+// 	}
+// };
 
 XYZ.prototype.start = function () {
 	const loadImage = getImageData(this._options.imgUrl);
@@ -256,17 +271,7 @@ XYZ.prototype._init = function () {
 	this.scene = new THREE.Scene();
 	// add a camera
 	this._setupCamera(); // no args for perspective camera
-	this._renderer = new THREE.WebGLRenderer({
-		alpha: true,
-		antialias: true
-	});
-	this._renderer.shadowMap.enabled = true; // enable shadow
-	this._renderer.physicallyCorrectLights = true; // enable physical lights
-	this._renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
-	this._renderer.setClearColor(this._options.canvas.color, this._options.canvas.opacity);
-	this._renderer.setSize(this._options.canvas.width, this._options.canvas.height);
-	this._renderer.setPixelRatio(devicePixelRatio);
-	document.body.appendChild(this._renderer.domElement);
+	this._createRenderer();
 	this._setupPlane(this._options.plane.color);
 	this._setupControls();
 	this._setupFigure(this._options.figure.color);
