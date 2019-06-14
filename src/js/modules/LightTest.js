@@ -90,8 +90,8 @@ LightTest.prototype.testLight = function ({
 			// this.light.shadow.bias = 0.000001;
 		}
 
-		let helper = new THREE.CameraHelper(this.light.shadow.camera);
-		this.scene.add(helper);
+		this.light.helper = new THREE.CameraHelper(this.light.shadow.camera);
+		this.scene.add(this.light.helper);
 
 		// if (!this.light.isDirectionalLight) {
 		// 	let f = this._gui.addFolder('camera');
@@ -120,6 +120,8 @@ LightTest.prototype.testLight = function ({
 			makeXYZGUI(this._gui, this.light.target.position, 'target', this.updateLight.bind(this));
 			break;
 	}
+
+	return this.light;
 };
 
 LightTest.prototype.addHelper = function (size, color) {

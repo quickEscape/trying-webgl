@@ -15,8 +15,8 @@ WebGL.addHelpers();
 
 Light.testLight({
 	type: 'directional',
-	color: 0xff0000,
-	intensity: 0.5,
+	color: 16711680,
+	intensity: 5,
 	position: [128, 96, 0],
 	castShadow: true
 });
@@ -24,7 +24,7 @@ Light.testLight({
 Light.testLight({
 	type: 'directional',
 	color: 0x0000ff,
-	intensity: 0.5,
+	intensity: 5,
 	position: [-120, 100, -115],
 	castShadow: true
 });
@@ -32,14 +32,15 @@ Light.testLight({
 Light.testLight({
 	type: 'directional',
 	color: 0x00ff00,
-	intensity: 0.5,
+	intensity: 5,
 	position: [-150, 200, 0],
 	castShadow: true
 });
 
 Light.testLight({
 	type: 'hemisphere',
-	intensity: 0.25
+	groundColor: 0xcccccc,
+	intensity: 0.75
 });
 
 // Light.testLight('ambient', 0xffffff, 0.3);
