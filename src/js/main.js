@@ -12,11 +12,33 @@ WebGL.addStats();
 WebGL.addHelpers();
 // testLight(lightType, lightColor, intensity, position, castShadow)
 // ambient | hemisphere | directional | point | spot
-// Light.testLight('point', 0xffffff, 0.01, [210, 485, -180], true);
-Light.testLight('directional', 0xffffff, 0.5, [-150, 600, 0], true);
-// Light.testLight('ambient', 0x0000ff, 0.2);
-// Light.testLight('hemisphere', null, 0.25);
-Light.testLight('point', 0xff0000, 0.5, [128, 96, 0]);
-Light.testLight('point', 0x00ff00, 0.5, [-128, 96, 0]);
-Light.testLight('point', 0x00ff00, 0.5, [0, 96, -128]);
-Light.testLight('point', 0xff0000, 0.5, [0, 96, 128]);
+Light.testLight({
+	type: 'directional',
+	color: 0xff0000,
+	intensity: 0.5,
+	position: [128, 96, 0],
+	castShadow: true
+});
+Light.testLight({
+	type: 'directional',
+	color: 0x0000ff,
+	intensity: 0.5,
+	position: [-120, 100, -115],
+	castShadow: true
+});
+Light.testLight({
+	type: 'directional',
+	color: 0x00ff00,
+	intensity: 0.5,
+	position: [-150, 200, 0],
+	castShadow: true
+});
+// Light.testLight('ambient', 0xffffff, 0.3);
+// Light.testLight('point', 0x00ff00, 0.25, [-128, 150, 0], true);
+// Light.testLight('point', 0x00ff00, 0.25, [0, 150, -128]);
+// Light.testLight('point', 0xff0000, 0.25, [0, 150, 128]);
+// Light.testLight('point', 0xff0000, 0.25, [128, 150, 0]);
+Light.testLight({
+	type: 'hemisphere',
+	intensity: 0.25
+});

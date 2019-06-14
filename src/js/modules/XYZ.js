@@ -25,7 +25,7 @@ export default function XYZ(imgUrl, imgWidth, imgHeight, fullscreen) {
 						y: 0.5465953228917613,
 						z: 2.6612027337138793
 					},
-					zoom: 2.75
+					zoom: 1.5
 				}
 			},
 			'orthographic': {
@@ -33,8 +33,8 @@ export default function XYZ(imgUrl, imgWidth, imgHeight, fullscreen) {
 				top: 256,
 				right: 256,
 				bottom: -256,
-				near: 224,
-				far: 480,
+				near: 10, // 224
+				far: 1000, // 480
 				initialSettings: {
 					position: {
 						x: 145,
@@ -109,9 +109,10 @@ XYZ.prototype._setupCamera = function (type) {
 
 XYZ.prototype._setupPlane = function (color) {
 	//THREE.PlaneGeometry (width, height, widthSegments, heightSegments)
-	this._options.plane.geometry = new THREE.PlaneGeometry(this._options.plane.width, this._options.plane.height, this._options.plane.wSegments, this._options.plane.hSegments);
-	this._options.plane.material = new THREE.MeshLambertMaterial({
-		color
+	this._options.plane.geometry = new THREE.PlaneBufferGeometry(this._options.plane.width, this._options.plane.height, this._options.plane.wSegments, this._options.plane.hSegments);
+	this._options.plane.material = new THREE.MeshStandardMaterial({
+		color,
+		side: THREE.DoubleSide
 	});
 
 	// this._options.plane.material = new THREE.ShadowMaterial();
@@ -130,9 +131,10 @@ XYZ.prototype._setupFigure = function (color) {
 	if you don't follow this part, we'll cover geometry and materials
 	in future posts */
 	// THREE.BoxGeometry(width, height, depth, widthSegments, heightSegments, depthSegments)
-	let geometry = new THREE.BoxGeometry(this._options.figure.blockSize - this._options.figure.blockSpacing, 1, this._options.figure.blockSize - this._options.figure.blockSpacing);
+	let geometry = new THREE.BoxBufferGeometry(this._options.figure.blockSize - this._options.figure.blockSpacing, 1, this._options.figure.blockSize - this._options.figure.blockSpacing);
 	let material = new THREE.MeshLambertMaterial({
-		color
+		color,
+		side: THREE.DoubleSide
 	});
 
 	for (let i = -this._options.figure.width / 2 + this._options.figure.blockSize / 2; i < this._options.figure.width / 2; i += this._options.figure.blockSize) {
@@ -253,16 +255,17 @@ XYZ.prototype._init = function () {
 	//start webGL block code
 	this.scene = new THREE.Scene();
 	// add a camera
-	this._setupCamera(1); // no args for perspective camera
+	this._setupCamera(); // no args for perspective camera
 	this._renderer = new THREE.WebGLRenderer({
 		alpha: true,
-		// antialias: true
+		antialias: true
 	});
 	this._renderer.shadowMap.enabled = true; // enable shadow
-	// this._renderer.physicallyCorrectLights = true; // enable physical lights
+	this._renderer.physicallyCorrectLights = true; // enable physical lights
 	this._renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 	this._renderer.setClearColor(this._options.canvas.color, this._options.canvas.opacity);
 	this._renderer.setSize(this._options.canvas.width, this._options.canvas.height);
+	this._renderer.setPixelRatio(devicePixelRatio);
 	document.body.appendChild(this._renderer.domElement);
 	this._setupPlane(this._options.plane.color);
 	this._setupControls();

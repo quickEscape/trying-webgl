@@ -14,22 +14,29 @@ export default function LightTest(objTHREE) {
 	this._setEvents();
 }
 
-// testLight(lightType : String, lightColor : Hex, intensity : Float, position : Array[x, y, z], castShadow : Boolean)
+// testLight(type : String, color : Hex, intensity : Float, position : Array[x, y, z], castShadow : Boolean)
 // ambient | hemisphere | directional | point | spot
-LightTest.prototype.testLight = function (lightType, lightColor, intensity, position, castShadow) {
-	this._lightType = lightType || 'directional';
-	this.intensity = intensity || 1;
+LightTest.prototype.testLight = function ({
+	type = 'ambient',
+	color = 0xFFFFFF,
+	skyColor = 0xFFFFFF,
+	groundColor = 0xFFFFFF,
+	intensity = 1,
+	position = [0, 0, 0],
+	target = [0, 0, 0],
+	castShadow = false
+}) {
+	this._lightType = type;
+	this.intensity = intensity;
+	this.lightColor = color;
 	switch (this._lightType) {
 		case 'ambient':
-			this.lightColor = lightColor || 0xFFFFFF;
 			this.light = new THREE.AmbientLight(this.lightColor, this.intensity);
 			if (this._count) break;
 			this._gui.addColor(new ColorGUIHelper(this.light, 'color'), 'value').name('color');
 			this._gui.add(this.light, 'intensity', 0, 2, 0.01);
 			break;
 		case 'hemisphere':
-			const skyColor = 0x0019ff; // light blue
-			const groundColor = 0x000000; // brownish orange
 			this.light = new THREE.HemisphereLight(skyColor, groundColor, this.intensity);
 			if (this._count) break;
 			this._gui.addColor(new ColorGUIHelper(this.light, 'color'), 'value').name('skyColor');
@@ -37,7 +44,6 @@ LightTest.prototype.testLight = function (lightType, lightColor, intensity, posi
 			this._gui.add(this.light, 'intensity', 0, 2, 0.01);
 			break;
 		case 'directional':
-			this.lightColor = lightColor || 0xFFFFFF;
 			this.light = new THREE.DirectionalLight(this.lightColor, this.intensity);
 			this.light.position.set(100, 200, 0);
 			// this.light.target.position.set(0, 0, 0);
@@ -46,16 +52,15 @@ LightTest.prototype.testLight = function (lightType, lightColor, intensity, posi
 			this._gui.add(this.light, 'intensity', 0, 2, 0.01);
 			break;
 		case 'point':
-			this.lightColor = lightColor || 0xFFFFFF;
 			this.light = new THREE.PointLight(this.lightColor, this.intensity);
-			this.light.position.copy(this.camera.position);
+			// this.light.position.copy(this.camera.position);
+			// this.light.distance = 750;
 			if (this._count) break;
 			this._gui.addColor(new ColorGUIHelper(this.light, 'color'), 'value').name('color');
 			this._gui.add(this.light, 'intensity', 0, 2, 0.01);
 			this._gui.add(this.light, 'distance', 0, 1000).onChange(this.updateLight.bind(this));
 			break;
 		case 'spot':
-			this.lightColor = lightColor || 0xffffff;
 			this.light = new THREE.SpotLight(this.lightColor, this.intensity);
 			this.light.position.set(200, 400, 0);
 			this._gui.add(new DegRadHelper(this.light, 'angle'), 'value', 0, 90).name('angle').onChange(this.updateLight.bind(this));
@@ -71,17 +76,11 @@ LightTest.prototype.testLight = function (lightType, lightColor, intensity, posi
 		this.light.shadow.mapSize.width = 1024; // default 512
 		this.light.shadow.mapSize.height = 1024; // default 512
 		this.light.shadow.camera.near = 10; // default 0.5
-		this.light.shadow.camera.far = 1024 + 256; // default 500
-
-		if (this.light.shadow.camera.type != 'OrthographicCamera') {
-			let f = this._gui.addFolder('camera');
-			f.add(this.light.shadow.camera, 'fov', 0, 120, 1);
-			folder.open();
-		}
+		this.light.shadow.camera.far = 1000; // default 500
+		this.light.shadow.bias = -0.005; // reduces self-shadowing on double-sided objects
 
 		// this.light.shadow.camera.fov = 32;
-		// this.light.shadow.radius = 4;
-		// this.light.shadowDarkness = 0.1;
+		// this.light.shadow.radius = 2;
 
 		if (this.light.isDirectionalLight) {
 			this.light.shadow.camera.left = -256;
@@ -93,6 +92,12 @@ LightTest.prototype.testLight = function (lightType, lightColor, intensity, posi
 
 		let helper = new THREE.CameraHelper(this.light.shadow.camera);
 		this.scene.add(helper);
+
+		// if (!this.light.isDirectionalLight) {
+		// 	let f = this._gui.addFolder('camera');
+		// 	f.add(this.light.shadow.camera, 'fov', 10, 120, 1).onChange(() => helper.update());
+		// 	f.open();
+		// }
 	}
 	this.scene.add(this.light);
 	this._count++;
