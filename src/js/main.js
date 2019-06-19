@@ -15,36 +15,40 @@ WebGL.addHelpers();
 
 Light.testLight({
 	type: 'directional',
-	color: 16711680,
+	color: 0xc55e2f,
 	intensity: 5,
-	position: [128, 96, 0],
-	castShadow: true
+	position: [-50, 400, -30],
+	castShadow: true,
+	bias: -0.005
 });
 
 Light.testLight({
-	type: 'directional',
-	color: 0x0000ff,
-	intensity: 5,
-	position: [-120, 100, -115],
-	castShadow: true
+	type: 'point',
+	color: 0x1400ff,
+	intensity: 1000,
+	position: [100, 40, 50],
+	distance: 300
 });
 
 Light.testLight({
-	type: 'directional',
-	color: 0x00ff00,
-	intensity: 5,
-	position: [-150, 200, 0],
-	castShadow: true
+	type: 'point',
+	color: 0xffffff,
+	intensity: 100,
+	position: [0, 40, -200],
+	distance: 400
 });
 
 Light.testLight({
 	type: 'hemisphere',
-	groundColor: 0xcccccc,
-	intensity: 0.75
+	groundColor: 0xffffff,
+	intensity: 0.5
 });
 
-// Light.testLight('ambient', 0xffffff, 0.3);
-// Light.testLight('point', 0x00ff00, 0.25, [-128, 150, 0], true);
-// Light.testLight('point', 0x00ff00, 0.25, [0, 150, -128]);
-// Light.testLight('point', 0xff0000, 0.25, [0, 150, 128]);
-// Light.testLight('point', 0xff0000, 0.25, [128, 150, 0]);
+Light.testLight({
+	type: 'spot',
+	color: 0xffffff,
+	intensity: 1000,
+	position: [250, 0, 50],
+	target: [-500, 0, 450],
+	distance: 300
+});

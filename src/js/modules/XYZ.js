@@ -16,12 +16,12 @@ export default function XYZ(imgUrl, imgWidth, imgHeight, fullscreen) {
 				far: 1000,
 				initialSettings: {
 					position: {
-						x: 200,
-						y: 300,
-						z: -200
+						x: 236,
+						y: 298,
+						z: -160
 					},
 					rotation: {
-						x: -2.3549216235704318,
+						x: -2.0643683989275443,
 						y: 0.5465953228917613,
 						z: 2.6612027337138793
 					},
@@ -64,7 +64,7 @@ export default function XYZ(imgUrl, imgWidth, imgHeight, fullscreen) {
 		figure: {
 			width: imgWidth * 4 || 160,
 			height: imgHeight * 4 || 160,
-			color: 0xffffff,
+			color: 0xac4521,
 			blockSize: 4,
 			blockSpacing: 0
 		},
@@ -91,7 +91,7 @@ XYZ.prototype._createRenderer = function () {
 
 	this._renderer.shadowMap.enabled = true; // enable shadow
 	this._renderer.physicallyCorrectLights = true; // enable physical lights
-	this._renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+	this._renderer.shadowMap.type = THREE.PCFSoftShadowMap; //THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 
 	this._renderer.setClearColor(this._options.canvas.color, this._options.canvas.opacity);
 	this._renderer.setSize(this._options.canvas.width, this._options.canvas.height);
@@ -142,13 +142,12 @@ XYZ.prototype._setupPlane = function (color) {
 // improve this func
 // _setupFigure(color: string or hex)
 XYZ.prototype._setupFigure = function (color) {
-	this._figure = new THREE.Group();
 	/* we're creating a cube to put in our scene - don't worry
 	if you don't follow this part, we'll cover geometry and materials
 	in future posts */
 	// THREE.BoxGeometry(width, height, depth, widthSegments, heightSegments, depthSegments)
 	let geometry = new THREE.BoxBufferGeometry(this._options.figure.blockSize - this._options.figure.blockSpacing, 1, this._options.figure.blockSize - this._options.figure.blockSpacing);
-	let material = new THREE.MeshLambertMaterial({
+	let material = new THREE.MeshStandardMaterial({
 		color,
 		side: THREE.DoubleSide
 	});
@@ -157,11 +156,9 @@ XYZ.prototype._setupFigure = function (color) {
 		for (let j = this._options.figure.height / 2 - this._options.figure.blockSize / 2; j > -this._options.figure.height / 2; j -= this._options.figure.blockSize) {
 			this.cubes.push(new THREE.Mesh(geometry, material));
 			this.cubes[this.cubes.length - 1].position.set(i, -1, j);
-			this._figure.add(this.cubes[this.cubes.length - 1]);
+			this.scene.add(this.cubes[this.cubes.length - 1]);
 		}
 	}
-
-	this.scene.add(this._figure);
 };
 
 // important to improve this func
@@ -259,9 +256,9 @@ XYZ.prototype.start = function () {
 
 XYZ.prototype._setEvents = function () {
 	this._renderer.domElement.ondblclick = () => {
-		// console.log(this._options.camera.elem.position);
-		// console.log(this._options.camera.elem.rotation);
-		// console.log(this._options.camera.elem.zoom);
+		console.log(this._options.camera.elem.position);
+		console.log(this._options.camera.elem.rotation);
+		console.log(this._options.camera.elem.zoom);
 		this._isDone = !this._isDone;
 		this._currentStep = 0;
 		for (let i = 0; i < this._figureSize; i++)

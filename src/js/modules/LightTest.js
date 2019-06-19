@@ -24,7 +24,10 @@ LightTest.prototype.testLight = function ({
 	intensity = 1,
 	position = [0, 0, 0],
 	target = [0, 0, 0],
-	castShadow = false
+	castShadow = false,
+	bias = 0,
+	distance = 0,
+	penumbra = 0
 }) {
 	this._lightType = type;
 	this.intensity = intensity;
@@ -34,14 +37,14 @@ LightTest.prototype.testLight = function ({
 			this.light = new THREE.AmbientLight(this.lightColor, this.intensity);
 			if (this._count) break;
 			this._gui.addColor(new ColorGUIHelper(this.light, 'color'), 'value').name('color');
-			this._gui.add(this.light, 'intensity', 0, 2, 0.01);
+			this._gui.add(this.light, 'intensity', 0, 1000, 0.01);
 			break;
 		case 'hemisphere':
 			this.light = new THREE.HemisphereLight(skyColor, groundColor, this.intensity);
 			if (this._count) break;
 			this._gui.addColor(new ColorGUIHelper(this.light, 'color'), 'value').name('skyColor');
 			this._gui.addColor(new ColorGUIHelper(this.light, 'groundColor'), 'value').name('groundColor');
-			this._gui.add(this.light, 'intensity', 0, 2, 0.01);
+			this._gui.add(this.light, 'intensity', 0, 1000, 0.01);
 			break;
 		case 'directional':
 			this.light = new THREE.DirectionalLight(this.lightColor, this.intensity);
@@ -49,7 +52,7 @@ LightTest.prototype.testLight = function ({
 			// this.light.target.position.set(0, 0, 0);
 			if (this._count) break;
 			this._gui.addColor(new ColorGUIHelper(this.light, 'color'), 'value').name('color');
-			this._gui.add(this.light, 'intensity', 0, 2, 0.01);
+			this._gui.add(this.light, 'intensity', 0, 1000, 0.01);
 			break;
 		case 'point':
 			this.light = new THREE.PointLight(this.lightColor, this.intensity);
@@ -57,19 +60,28 @@ LightTest.prototype.testLight = function ({
 			// this.light.distance = 750;
 			if (this._count) break;
 			this._gui.addColor(new ColorGUIHelper(this.light, 'color'), 'value').name('color');
-			this._gui.add(this.light, 'intensity', 0, 2, 0.01);
+			this._gui.add(this.light, 'intensity', 0, 1000, 0.01);
 			this._gui.add(this.light, 'distance', 0, 1000).onChange(this.updateLight.bind(this));
 			break;
 		case 'spot':
 			this.light = new THREE.SpotLight(this.lightColor, this.intensity);
 			this.light.position.set(200, 400, 0);
+			if (this._count) break;
 			this._gui.add(new DegRadHelper(this.light, 'angle'), 'value', 0, 90).name('angle').onChange(this.updateLight.bind(this));
 			this._gui.add(this.light, 'penumbra', 0, 1, 0.01);
 			break;
 	}
 
 	if (!this.light) return;
-	if (position) this.light.position.set(...position);
+	if (typeof this.light.position != 'undefined') this.light.position.set(...position);
+	if (typeof this.light.distance != 'undefined') this.light.distance = distance;
+	if (typeof this.light.penumbra != 'undefined') this.light.penumbra = penumbra;
+	if (typeof this.light.target != 'undefined') {
+		let targetLight = new THREE.Object3D();
+		targetLight.position.set(...target);
+		this.scene.add(targetLight);
+		this.light.target = targetLight;
+	}
 	if (castShadow && typeof this.light.castShadow != 'undefined') {
 		//Set up shadow properties for the light
 		this.light.castShadow = true;
@@ -77,7 +89,7 @@ LightTest.prototype.testLight = function ({
 		this.light.shadow.mapSize.height = 1024; // default 512
 		this.light.shadow.camera.near = 10; // default 0.5
 		this.light.shadow.camera.far = 1000; // default 500
-		this.light.shadow.bias = -0.005; // reduces self-shadowing on double-sided objects
+		this.light.shadow.bias = bias; // -0.007; // reduces self-shadowing on double-sided objects
 
 		// this.light.shadow.camera.fov = 32;
 		// this.light.shadow.radius = 2;
@@ -87,7 +99,6 @@ LightTest.prototype.testLight = function ({
 			this.light.shadow.camera.right = 256;
 			this.light.shadow.camera.top = 256;
 			this.light.shadow.camera.bottom = -256;
-			// this.light.shadow.bias = 0.000001;
 		}
 
 		this.light.helper = new THREE.CameraHelper(this.light.shadow.camera);
@@ -101,7 +112,6 @@ LightTest.prototype.testLight = function ({
 	}
 	this.scene.add(this.light);
 	this._count++;
-	if (this.light.target) this.scene.add(this.light.target);
 
 	if (this._count > 1) return;
 	switch (this._lightType) {
