@@ -49,6 +49,6 @@
   },
   "dependencies": {
     "object-fit-images": "^3.2.4",
-    "socket.io": "^2.2.0"
+    "socket.io": "^2.4.0"
   }
 }
